@@ -1,0 +1,8 @@
+package-lock.json
+.svelte-kit/
+build/
+dist/
+drizzle/
+docs/
+reports/
+CLAUDE.md
