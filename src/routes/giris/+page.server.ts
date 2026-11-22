@@ -38,7 +38,7 @@ export const actions: Actions = {
 
 		const next = form.get('redirectTo');
 		const targetPath =
-			typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : '/isler';
+			typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') ? next : '/pano';
 
 		throw redirect(303, targetPath);
 	},

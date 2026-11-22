@@ -1,4 +1,17 @@
-import { asc, desc, eq, inArray } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	ilike,
+	inArray,
+	isNotNull,
+	isNull,
+	lt,
+	notInArray,
+	or,
+	type SQL
+} from 'drizzle-orm';
 import { z } from 'zod';
 import { calculateBalance } from '$lib/domain/balance';
 import { generatePublicToken, generateWorkCode } from '$lib/domain/code';
@@ -60,11 +73,63 @@ export interface WorkItemListRow extends WorkItemRow {
 	assigneeName: string | null;
 }
 
+export interface WorkItemFilters {
+	q?: string | null;
+	status?: WorkStatus | null;
+	workType?: WorkType | null;
+	priority?: 'low' | 'normal' | 'high' | null;
+	assignedTo?: number | 'unassigned' | null;
+	overdue?: boolean;
+}
+
 export async function listWorkItems(
 	db: Database,
-	user: AuthUser | null
+	user: AuthUser | null,
+	filters?: WorkItemFilters,
+	now: Date = new Date()
 ): Promise<WorkItemListRow[]> {
 	const authed = requireUser(user);
+
+	const conditions: SQL[] = [];
+
+	if (authed.role === 'staff') {
+		conditions.push(eq(workItems.assignedTo, authed.id));
+	}
+
+	if (filters?.assignedTo === 'unassigned') {
+		conditions.push(isNull(workItems.assignedTo));
+	} else if (typeof filters?.assignedTo === 'number' && Number.isInteger(filters.assignedTo)) {
+		conditions.push(eq(workItems.assignedTo, filters.assignedTo));
+	}
+
+	if (filters?.status) {
+		conditions.push(eq(workItems.status, filters.status));
+	}
+	if (filters?.workType) {
+		conditions.push(eq(workItems.workType, filters.workType));
+	}
+	if (filters?.priority) {
+		conditions.push(eq(workItems.priority, filters.priority));
+	}
+	if (filters?.overdue) {
+		conditions.push(
+			isNotNull(workItems.dueDate),
+			lt(workItems.dueDate, now),
+			notInArray(workItems.status, ['delivered', 'cancelled'])
+		);
+	}
+	if (filters?.q && filters.q.trim().length > 0) {
+		const pattern = `%${filters.q.trim()}%`;
+		const searchCondition = or(
+			ilike(workItems.code, pattern),
+			ilike(workItems.title, pattern),
+			ilike(customers.name, pattern),
+			ilike(customers.company, pattern)
+		);
+		if (searchCondition) {
+			conditions.push(searchCondition);
+		}
+	}
 
 	const baseQuery = db
 		.select({
@@ -90,9 +155,9 @@ export async function listWorkItems(
 		.innerJoin(customers, eq(workItems.customerId, customers.id))
 		.leftJoin(users, eq(workItems.assignedTo, users.id));
 
-	if (authed.role === 'staff') {
+	if (conditions.length > 0) {
 		return baseQuery
-			.where(eq(workItems.assignedTo, authed.id))
+			.where(and(...conditions))
 			.orderBy(desc(workItems.createdAt), desc(workItems.id));
 	}
 

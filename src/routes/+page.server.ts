@@ -5,5 +5,5 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
 		throw redirect(303, '/giris');
 	}
-	throw redirect(303, '/isler');
+	throw redirect(303, '/pano');
 };

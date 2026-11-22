@@ -1,13 +1,24 @@
 <script lang="ts">
-	import { formatTrPhone } from '$lib/domain/phone';
+	import { buildMailtoUrl } from '$lib/domain/links';
+	import { buildWhatsAppUrl, formatTrPhone } from '$lib/domain/phone';
 
 	let { data, form } = $props();
 </script>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-semibold text-slate-900">Müşteriler</h1>
-		<span class="text-sm text-slate-500">Toplam {data.customers.length} kayıt</span>
+	<div class="flex flex-wrap items-center justify-between gap-2">
+		<div>
+			<h1 class="text-2xl font-semibold text-slate-900">Müşteriler</h1>
+			<span class="text-xs text-slate-500">Toplam {data.customers.length} kayıt</span>
+		</div>
+		{#if data.user?.role === 'admin'}
+			<a
+				href="/api/export?type=customers"
+				class="rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+			>
+				CSV İndir
+			</a>
+		{/if}
 	</div>
 
 	{#if form?.error}
@@ -116,8 +127,36 @@
 								<div class="text-xs text-slate-500">{c.company}</div>
 							{/if}
 						</td>
-						<td class="px-4 py-3 text-slate-700">{c.phone ? formatTrPhone(c.phone) : '—'}</td>
-						<td class="px-4 py-3 text-slate-700">{c.email ?? '—'}</td>
+						<td class="px-4 py-3 text-slate-700">
+							{#if c.phone}
+								{@const waUrl = buildWhatsAppUrl(c.phone)}
+								<div>{formatTrPhone(c.phone)}</div>
+								{#if waUrl}
+									<a
+										href={waUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="text-xs font-medium text-emerald-700 hover:underline"
+									>
+										WhatsApp
+									</a>
+								{/if}
+							{:else}
+								—
+							{/if}
+						</td>
+						<td class="px-4 py-3 text-slate-700">
+							{#if c.email}
+								{@const mailUrl = buildMailtoUrl(c.email)}
+								{#if mailUrl}
+									<a href={mailUrl} class="text-slate-700 hover:underline">{c.email}</a>
+								{:else}
+									{c.email}
+								{/if}
+							{:else}
+								—
+							{/if}
+						</td>
 						<td class="px-4 py-3">
 							<span
 								class="rounded px-2 py-0.5 text-xs font-medium {c.kind === 'active'

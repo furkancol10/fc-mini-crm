@@ -1,9 +1,13 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { getPaymentStatusLabel } from '$lib/domain/balance';
+	import { buildMailtoUrl, buildTrackingShareMessage } from '$lib/domain/links';
 	import { COMMON_VAT_RATES, formatKurus } from '$lib/domain/money';
+	import { buildWhatsAppUrl } from '$lib/domain/phone';
 	import { getAllowedNextStatuses, getStatusLabel } from '$lib/domain/status';
 
 	let { data, form } = $props();
+	let copiedTracking = $state(false);
 
 	interface DraftLine {
 		id: number;
@@ -85,6 +89,34 @@
 	const metadataEntries = $derived(
 		Object.entries(data.item.metadata ?? {}).filter(([, v]) => v !== undefined && v !== '')
 	);
+	const trackingPath = $derived(`/takip/${data.item.publicToken}`);
+	const trackingFullUrl = $derived(`${page.url.origin}${trackingPath}`);
+	const shareMessage = $derived(
+		buildTrackingShareMessage({
+			code: data.item.code,
+			title: data.item.title,
+			statusLabel: getStatusLabel(data.item.status, data.item.workType),
+			trackingUrl: trackingFullUrl
+		})
+	);
+	const waShareUrl = $derived(buildWhatsAppUrl(data.customer.phone, shareMessage));
+	const mailtoShareUrl = $derived(
+		buildMailtoUrl(
+			data.customer.email,
+			`${data.item.code} — İş Takip ve Teklif Bilgilendirmesi`,
+			shareMessage
+		)
+	);
+
+	async function copyTrackingUrl() {
+		try {
+			await navigator.clipboard.writeText(trackingFullUrl);
+			copiedTracking = true;
+			setTimeout(() => (copiedTracking = false), 2000);
+		} catch {
+			copiedTracking = false;
+		}
+	}
 </script>
 
 <div class="space-y-6">
@@ -118,6 +150,59 @@
 			{form.success}
 		</div>
 	{/if}
+
+	<!-- Müşteri Takip Bağlantısı ve Hızlı İletişim (wa.me / mailto) -->
+	<section class="rounded-lg border border-slate-200 bg-white p-4">
+		<div class="flex flex-wrap items-center justify-between gap-3">
+			<div class="min-w-0">
+				<div class="text-xs font-semibold text-slate-600 uppercase">Müşteri Takip Bağlantısı</div>
+				<a
+					href={trackingPath}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="mt-0.5 block truncate text-sm font-medium text-slate-900 underline"
+				>
+					{trackingPath}
+				</a>
+			</div>
+
+			<div class="flex flex-wrap items-center gap-2 text-xs">
+				<button
+					type="button"
+					onclick={copyTrackingUrl}
+					class="rounded border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+				>
+					{copiedTracking ? 'Kopyalandı' : 'Bağlantıyı Kopyala'}
+				</button>
+				<a
+					href={trackingPath}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="rounded border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+				>
+					Takip Sayfası
+				</a>
+				{#if waShareUrl}
+					<a
+						href={waShareUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="rounded bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-700"
+					>
+						WhatsApp Mesaj
+					</a>
+				{/if}
+				{#if mailtoShareUrl}
+					<a
+						href={mailtoShareUrl}
+						class="rounded border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+					>
+						E-posta Gönder
+					</a>
+				{/if}
+			</div>
+		</div>
+	</section>
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Detay & Durum Geçişi -->
