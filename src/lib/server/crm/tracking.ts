@@ -292,6 +292,9 @@ export async function rejectQuoteByToken(
 		if (!workItem) {
 			throw new NotFoundError('Takip kaydı bulunamadı');
 		}
+		if (workItem.status === 'delivered' || workItem.status === 'cancelled') {
+			throw new ValidationError('Teslim edilmiş veya iptal edilmiş işin teklifi reddedilemez');
+		}
 
 		const [quote] = await tx
 			.select()

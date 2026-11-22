@@ -114,7 +114,15 @@
 			data.query.overdue
 		)
 	);
+
+	const emptyWorkMessage = $derived(
+		hasActiveFilters ? 'Filtrelere uygun iş kaydı bulunamadı.' : 'Henüz iş kaydı bulunmuyor.'
+	);
 </script>
+
+<svelte:head>
+	<title>İş Kayıtları — Mini CRM</title>
+</svelte:head>
 
 {#snippet kanbanCard(w: (typeof data.workItems)[number])}
 	{@const nextOptions = getAllowedNextStatuses(w.status)}
@@ -131,13 +139,13 @@
 			<div class="flex flex-wrap justify-end gap-1">
 				<span
 					class="rounded px-1.5 py-0.5 text-[10px] font-medium {w.workType === 'service'
-						? 'bg-sky-100 text-sky-800'
-						: 'bg-violet-100 text-violet-800'}"
+						? 'bg-sky-100 text-sky-900'
+						: 'bg-violet-100 text-violet-900'}"
 				>
 					{w.workType === 'service' ? 'Servis' : 'Ajans'}
 				</span>
 				{#if w.priority === 'high'}
-					<span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">
+					<span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-900">
 						Yüksek
 					</span>
 				{/if}
@@ -151,14 +159,14 @@
 
 		<a
 			href="/isler/{w.id}"
-			class="block text-sm leading-snug font-medium text-slate-900 hover:underline"
+			class="block text-sm leading-snug font-medium break-words text-slate-900 hover:underline"
 		>
 			{w.title}
 		</a>
 
-		<div class="space-y-0.5 text-xs text-slate-500">
-			<div>Müşteri: <span class="text-slate-700">{w.customerName}</span></div>
-			<div>Atanan: <span class="text-slate-700">{w.assigneeName ?? '—'}</span></div>
+		<div class="space-y-0.5 text-xs text-slate-600">
+			<div>Müşteri: <span class="text-slate-800">{w.customerName}</span></div>
+			<div>Atanan: <span class="text-slate-800">{w.assigneeName ?? '—'}</span></div>
 			{#if w.dueDate}
 				<div class={overdue ? 'font-medium text-red-700' : ''}>
 					Termin: {new Date(w.dueDate).toLocaleDateString('tr-TR')}
@@ -191,7 +199,7 @@
 				</button>
 			</form>
 		{:else}
-			<div class="border-t border-slate-100 pt-2 text-[11px] text-slate-400">Son durum</div>
+			<div class="border-t border-slate-100 pt-2 text-[11px] text-slate-600">Son durum</div>
 		{/if}
 	</article>
 {/snippet}
@@ -201,7 +209,7 @@
 	<div class="flex flex-wrap items-center justify-between gap-3">
 		<div>
 			<h1 class="text-2xl font-semibold text-slate-900">İş Kayıtları</h1>
-			<span class="text-xs text-slate-500">
+			<span class="text-xs text-slate-600">
 				{data.workItems.length} kayıt
 				{#if data.user?.role === 'staff'}
 					(yalnız size atananlar)
@@ -210,9 +218,14 @@
 		</div>
 
 		<div class="flex flex-wrap items-center gap-2">
-			<div class="inline-flex rounded-md border border-slate-300 bg-white p-0.5 text-xs">
+			<div
+				class="inline-flex rounded-md border border-slate-300 bg-white p-0.5 text-xs"
+				role="group"
+				aria-label="Görünüm seçimi"
+			>
 				<a
 					href={buildQueryUrl('/isler', { view: 'list' })}
+					aria-current={data.query.view === 'list' ? 'page' : undefined}
 					class="rounded px-3 py-1 font-medium transition {data.query.view === 'list'
 						? 'bg-slate-900 text-white'
 						: 'text-slate-700 hover:bg-slate-100'}"
@@ -221,6 +234,7 @@
 				</a>
 				<a
 					href={buildQueryUrl('/isler', { view: 'kanban' })}
+					aria-current={data.query.view === 'kanban' ? 'page' : undefined}
 					class="rounded px-3 py-1 font-medium transition {data.query.view === 'kanban'
 						? 'bg-slate-900 text-white'
 						: 'text-slate-700 hover:bg-slate-100'}"
@@ -241,18 +255,24 @@
 	</div>
 
 	{#if form?.error}
-		<div class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+		<div
+			role="alert"
+			class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+		>
 			{form.error}
 		</div>
 	{/if}
 	{#if form?.success}
-		<div class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+		<div
+			role="status"
+			class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800"
+		>
 			{form.success}
 		</div>
 	{/if}
 
 	<!-- URL Tabanlı Filtreler -->
-	<section class="rounded-lg border border-slate-200 bg-white p-4">
+	<section aria-label="İş filtreleri" class="rounded-lg border border-slate-200 bg-white p-4">
 		<form method="GET" action="/isler" class="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-6">
 			{#if data.query.view === 'kanban'}
 				<input type="hidden" name="view" value="kanban" />
@@ -261,15 +281,17 @@
 			<input
 				type="search"
 				name="q"
+				aria-label="Kod, başlık veya müşteri ara"
 				value={data.query.q}
 				placeholder="Kod, başlık veya müşteri ara..."
-				class="rounded border border-slate-300 px-3 py-1.5 text-sm sm:col-span-2"
+				class="min-w-0 rounded border border-slate-300 px-3 py-1.5 text-sm sm:col-span-2"
 			/>
 
 			<select
 				name="workType"
+				aria-label="Sektör filtresi"
 				value={data.query.workType}
-				class="rounded border border-slate-300 px-2.5 py-1.5 text-sm"
+				class="min-w-0 rounded border border-slate-300 px-2.5 py-1.5 text-sm"
 			>
 				<option value="">Tüm Sektörler</option>
 				<option value="service">Teknik Servis</option>
@@ -278,8 +300,9 @@
 
 			<select
 				name="status"
+				aria-label="Durum filtresi"
 				value={data.query.status}
-				class="rounded border border-slate-300 px-2.5 py-1.5 text-sm"
+				class="min-w-0 rounded border border-slate-300 px-2.5 py-1.5 text-sm"
 			>
 				<option value="">Tüm Durumlar</option>
 				{#each ALL_WORK_STATUSES as st (st)}
@@ -289,8 +312,9 @@
 
 			<select
 				name="priority"
+				aria-label="Öncelik filtresi"
 				value={data.query.priority}
-				class="rounded border border-slate-300 px-2.5 py-1.5 text-sm"
+				class="min-w-0 rounded border border-slate-300 px-2.5 py-1.5 text-sm"
 			>
 				<option value="">Tüm Öncelikler</option>
 				<option value="high">Yüksek</option>
@@ -301,8 +325,9 @@
 			{#if data.user?.role === 'admin'}
 				<select
 					name="assignedTo"
+					aria-label="Sorumlu kişi filtresi"
 					value={data.query.assignedTo}
-					class="rounded border border-slate-300 px-2.5 py-1.5 text-sm"
+					class="min-w-0 rounded border border-slate-300 px-2.5 py-1.5 text-sm"
 				>
 					<option value="">Tüm Sorumlular</option>
 					<option value="unassigned">Atanmamış</option>
@@ -322,7 +347,7 @@
 					{#if hasActiveFilters}
 						<a
 							href={data.query.view === 'kanban' ? '/isler?view=kanban' : '/isler'}
-							class="rounded border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
+							class="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
 						>
 							Filtreleri Temizle
 						</a>
@@ -344,7 +369,7 @@
 			+ Yeni İş / Talep Oluştur
 		</summary>
 		{#if data.customers.length === 0}
-			<p class="mt-3 text-sm text-amber-800">
+			<p class="mt-3 text-sm text-amber-900">
 				İş kaydı açmak için önce <a href="/musteriler" class="underline">Müşteriler</a> sayfasından bir
 				müşteri ekleyin.
 			</p>
@@ -428,11 +453,19 @@
 						/>
 					</label>
 					<label class="block text-sm">
-						<span class="text-slate-700">Marka / Model</span>
+						<span class="text-slate-700">Marka</span>
 						<input
 							name="meta_brand"
 							class="mt-1 w-full rounded border border-slate-300 px-3 py-1.5"
-							placeholder="Örn. Lenovo ThinkPad"
+							placeholder="Örn. Lenovo"
+						/>
+					</label>
+					<label class="block text-sm">
+						<span class="text-slate-700">Model</span>
+						<input
+							name="meta_model"
+							class="mt-1 w-full rounded border border-slate-300 px-3 py-1.5"
+							placeholder="Örn. ThinkPad E15"
 						/>
 					</label>
 					<label class="block text-sm">
@@ -442,7 +475,7 @@
 							class="mt-1 w-full rounded border border-slate-300 px-3 py-1.5"
 						/>
 					</label>
-					<label class="block text-sm sm:col-span-2 lg:col-span-3">
+					<label class="block text-sm sm:col-span-2">
 						<span class="text-slate-700">Aksesuarlar</span>
 						<input
 							name="meta_accessories"
@@ -470,7 +503,7 @@
 				{/if}
 
 				<label class="block text-sm sm:col-span-2 lg:col-span-3">
-					<span class="text-slate-700">Açıklama / Ön Teşhis / Brief</span>
+					<span class="text-slate-700">Açıklama / Ön Teşhis / Kapsam</span>
 					<textarea
 						name="description"
 						rows="2"
@@ -512,12 +545,12 @@
 					{/each}
 				</div>
 
-				<div class="mt-3 space-y-3">
+				<div class="mt-3 space-y-3" role="tabpanel">
 					{#if groupedByStatus[mobileTab].length === 0}
 						<p
-							class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500"
+							class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600"
 						>
-							Bu durumda iş kaydı yok.
+							Bu durumda iş kaydı bulunmuyor.
 						</p>
 					{:else}
 						{#each groupedByStatus[mobileTab] as w (w.id)}
@@ -543,7 +576,7 @@
 						<div class="space-y-2.5">
 							{#if colItems.length === 0}
 								<p
-									class="rounded border border-dashed border-slate-300 p-3 text-center text-xs text-slate-400"
+									class="rounded border border-dashed border-slate-300 p-3 text-center text-xs text-slate-600"
 								>
 									Kayıt yok
 								</p>
@@ -563,9 +596,9 @@
 		<section class="space-y-3 sm:hidden">
 			{#if data.workItems.length === 0}
 				<p
-					class="rounded-lg border border-slate-200 bg-white p-6 text-center text-sm text-slate-500"
+					class="rounded-lg border border-slate-200 bg-white p-6 text-center text-sm text-slate-600"
 				>
-					Görüntülenecek iş kaydı bulunamadı.
+					{emptyWorkMessage}
 				</p>
 			{:else}
 				{#each data.workItems as w (w.id)}
@@ -579,19 +612,21 @@
 							<a href="/isler/{w.id}" class="text-sm font-semibold text-slate-900 hover:underline">
 								{w.code}
 							</a>
-							<span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">
+							<span
+								class="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800"
+							>
 								{getStatusLabel(w.status, w.workType)}
 							</span>
 						</div>
 						<a
 							href="/isler/{w.id}"
-							class="block text-sm font-medium text-slate-900 hover:underline"
+							class="block text-sm font-medium break-words text-slate-900 hover:underline"
 						>
 							{w.title}
 						</a>
 						<div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600">
 							<span>{w.customerName}</span>
-							<span>· {w.workType === 'service' ? 'Teknik Servis' : 'Ajans'}</span>
+							<span>· {w.workType === 'service' ? 'Teknik Servis' : 'Ajans / Hizmet'}</span>
 							<span>· {priorityLabels[w.priority]}</span>
 							{#if overdue}
 								<span class="font-semibold text-red-700">· Gecikmiş</span>
@@ -620,8 +655,8 @@
 				<tbody class="divide-y divide-slate-100">
 					{#if data.workItems.length === 0}
 						<tr>
-							<td colspan="8" class="px-4 py-6 text-center text-slate-500">
-								Görüntülenecek iş kaydı bulunamadı.
+							<td colspan="8" class="px-4 py-6 text-center text-slate-600">
+								{emptyWorkMessage}
 							</td>
 						</tr>
 					{/if}
@@ -634,19 +669,21 @@
 								</a>
 							</td>
 							<td class="px-4 py-3 text-slate-700">{w.customerName}</td>
-							<td class="px-4 py-3 text-xs text-slate-600">
-								{w.workType === 'service' ? 'Teknik Servis' : 'Ajans'}
+							<td class="px-4 py-3 text-xs text-slate-700">
+								{w.workType === 'service' ? 'Teknik Servis' : 'Ajans / Hizmet'}
 							</td>
 							<td class="px-4 py-3">
-								<span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">
+								<span
+									class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-slate-800"
+								>
 									{getStatusLabel(w.status, w.workType)}
 								</span>
 							</td>
-							<td class="px-4 py-3 text-xs text-slate-600">{priorityLabels[w.priority]}</td>
+							<td class="px-4 py-3 text-xs text-slate-700">{priorityLabels[w.priority]}</td>
 							<td
-								class="px-4 py-3 text-xs {overdue
+								class="px-4 py-3 text-xs whitespace-nowrap {overdue
 									? 'font-semibold text-red-700'
-									: 'text-slate-600'}"
+									: 'text-slate-700'}"
 							>
 								{#if w.dueDate}
 									{new Date(w.dueDate).toLocaleDateString('tr-TR')}
@@ -657,8 +694,8 @@
 									—
 								{/if}
 							</td>
-							<td class="px-4 py-3 text-slate-600">{w.assigneeName ?? '—'}</td>
-							<td class="px-4 py-3 text-right">
+							<td class="px-4 py-3 text-slate-700">{w.assigneeName ?? '—'}</td>
+							<td class="px-4 py-3 text-right whitespace-nowrap">
 								<a
 									href="/isler/{w.id}"
 									class="mr-2 text-xs font-medium text-slate-700 hover:underline"
@@ -668,7 +705,9 @@
 								{#if data.user?.role === 'admin'}
 									<form method="POST" action="?/delete" class="inline">
 										<input type="hidden" name="id" value={w.id} />
-										<button type="submit" class="text-xs text-red-600 hover:underline">Sil</button>
+										<button type="submit" class="text-xs font-medium text-red-700 hover:underline">
+											Sil
+										</button>
 									</form>
 								{/if}
 							</td>

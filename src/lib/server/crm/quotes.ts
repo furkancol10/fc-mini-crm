@@ -18,7 +18,7 @@ import {
 import { ConflictError, NotFoundError, ValidationError, isPgUniqueViolation } from './errors';
 
 export class QuoteNotEditableError extends ConflictError {
-	constructor(message = 'Yalnız taslak (draft) durumundaki teklifler düzenlenebilir') {
+	constructor(message = 'Yalnız taslak durumundaki teklifler düzenlenebilir') {
 		super(message);
 		this.name = 'QuoteNotEditableError';
 	}

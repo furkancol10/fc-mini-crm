@@ -178,4 +178,37 @@ describe('pano 4 KPI, son 10 log ve filtreli iş listesi (gerçek Postgres)', ()
 		const staffAttempt = await listWorkItems(db, staff, { assignedTo: otherStaff.id });
 		expect(staffAttempt).toEqual([]);
 	});
+
+	it('arama filtresi (q) ILIKE joker karakterlerini (% ve _) kaçışlar', async () => {
+		const c1 = await createCustomer(db, admin, { name: 'Ali Veli', kind: 'active' });
+		const normal = await createWorkItem(db, admin, {
+			customerId: c1.id,
+			workType: 'service',
+			title: 'Ekran değişimi'
+		});
+		const withPercent = await createWorkItem(db, admin, {
+			customerId: c1.id,
+			workType: 'service',
+			title: 'Pil sağlığı 100% kontrolü'
+		});
+		const withUnderscore = await createWorkItem(db, admin, {
+			customerId: c1.id,
+			workType: 'agency',
+			title: 'Kampanya_A görsel seti'
+		});
+
+		// Yalnız '%' araması normal kayıtları eşlememeli, sadece literal '%' içeren kaydı getirmeli
+		const percentMatches = await listWorkItems(db, admin, { q: '%' });
+		expect(percentMatches.map((x) => x.id)).toEqual([withPercent.id]);
+		expect(percentMatches.map((x) => x.id)).not.toContain(normal.id);
+
+		// Yalnız '_' araması tek karakter joker gibi davranmamalı, sadece literal '_' içeren kaydı getirmeli
+		const underscoreMatches = await listWorkItems(db, admin, { q: '_' });
+		expect(underscoreMatches.map((x) => x.id)).toEqual([withUnderscore.id]);
+		expect(underscoreMatches.map((x) => x.id)).not.toContain(normal.id);
+
+		// Literal metin + joker karakteri birlikte
+		const exactPercent = await listWorkItems(db, admin, { q: '100%' });
+		expect(exactPercent.map((x) => x.id)).toEqual([withPercent.id]);
+	});
 });

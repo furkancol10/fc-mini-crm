@@ -78,8 +78,24 @@ export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
 	return { check, reset };
 }
 
-export const demoResetApiLimiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
-export const panelDemoResetLimiter = createRateLimiter({ limit: 3, windowMs: 60_000 });
+function parsePositiveIntEnv(name: string, fallback: number): number {
+	// Yalnız yerel/e2e için; Vercel'de geçersiz kılma yok sayılır
+	// (vite preview NODE_ENV=production verebildiğinden NODE_ENV ile ayırt edilmez).
+	if (process.env.VERCEL) return fallback;
+	const raw = process.env[name];
+	if (!raw) return fallback;
+	const parsed = Number(raw);
+	return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export const demoResetApiLimiter = createRateLimiter({
+	limit: parsePositiveIntEnv('DEMO_RESET_API_RATE_LIMIT', 5),
+	windowMs: 60_000
+});
+export const panelDemoResetLimiter = createRateLimiter({
+	limit: parsePositiveIntEnv('PANEL_DEMO_RESET_RATE_LIMIT', 3),
+	windowMs: 60_000
+});
 export const trackingReadLimiter = createRateLimiter({ limit: 60, windowMs: 60_000 });
 export const trackingActionLimiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
 

@@ -16,10 +16,14 @@
 	);
 </script>
 
+<svelte:head>
+	<title>{data.customer.name} — Müşteriler | Mini CRM</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center justify-between gap-3">
 		<div>
-			<a href="/musteriler" class="text-xs text-slate-500 hover:underline">← Müşterilere Dön</a>
+			<a href="/musteriler" class="text-xs text-slate-600 hover:underline">← Müşterilere Dön</a>
 			<h1 class="mt-1 text-2xl font-semibold text-slate-900">{data.customer.name}</h1>
 		</div>
 		<div class="flex flex-wrap items-center gap-2 text-xs">
@@ -28,7 +32,7 @@
 					href={waUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="rounded bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-700"
+					class="rounded bg-emerald-700 px-3 py-1.5 font-medium text-white hover:bg-emerald-800"
 				>
 					WhatsApp Mesaj
 				</a>
@@ -45,17 +49,23 @@
 	</div>
 
 	{#if form?.error}
-		<div class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+		<div
+			role="alert"
+			class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+		>
 			{form.error}
 		</div>
 	{/if}
 	{#if form?.success}
-		<div class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+		<div
+			role="status"
+			class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800"
+		>
 			{form.success}
 		</div>
 	{/if}
 
-	<section class="rounded-lg border border-slate-200 bg-white p-5">
+	<section class="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
 		<h2 class="text-base font-semibold text-slate-800">Müşteri Bilgileri</h2>
 		<form method="POST" action="?/update" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 			<label class="block text-sm">
@@ -107,7 +117,7 @@
 					value={data.customer.kind}
 					class="mt-1 w-full rounded border border-slate-300 px-3 py-1.5"
 				>
-					<option value="lead">Aday (Lead)</option>
+					<option value="lead">Aday Müşteri</option>
 					<option value="active">Aktif Müşteri</option>
 				</select>
 			</label>
@@ -131,23 +141,30 @@
 		</form>
 	</section>
 
-	<section class="rounded-lg border border-slate-200 bg-white p-5">
+	<section class="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
 		<h2 class="text-base font-semibold text-slate-800">Bağlı İş Kayıtları</h2>
 		{#if data.workItems.length === 0}
-			<p class="mt-3 text-sm text-slate-500">Bu müşteriye ait görüntülenecek iş kaydı yok.</p>
+			<p class="mt-3 text-sm text-slate-600">
+				Bu müşteriye ait görüntülenecek iş kaydı bulunmuyor.
+			</p>
 		{:else}
 			<ul class="mt-3 divide-y divide-slate-100 text-sm">
 				{#each data.workItems as w (w.id)}
-					<li class="flex items-center justify-between py-2.5">
-						<div>
-							<a href="/isler/{w.id}" class="font-medium text-slate-900 hover:underline">
+					<li class="flex flex-wrap items-center justify-between gap-2 py-2.5">
+						<div class="min-w-0">
+							<a
+								href="/isler/{w.id}"
+								class="font-medium break-words text-slate-900 hover:underline"
+							>
 								{w.code} — {w.title}
 							</a>
-							<div class="text-xs text-slate-500">
-								{w.workType === 'service' ? 'Teknik Servis' : 'Ajans'}
+							<div class="text-xs text-slate-600">
+								{w.workType === 'service' ? 'Teknik Servis' : 'Ajans / Hizmet'}
 							</div>
 						</div>
-						<span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+						<span
+							class="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800"
+						>
 							{getStatusLabel(w.status, w.workType)}
 						</span>
 					</li>
