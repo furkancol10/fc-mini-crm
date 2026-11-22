@@ -387,7 +387,8 @@ export async function approveQuote(
 				.select()
 				.from(workItems)
 				.where(eq(workItems.id, quote.workItemId))
-				.limit(1);
+				.limit(1)
+				.for('update');
 			if (!workItem) {
 				throw new NotFoundError('İş kaydı bulunamadı');
 			}

@@ -302,7 +302,13 @@ export async function transitionWorkItemStatus(
 	const authed = requireUser(user);
 
 	return db.transaction(async (tx) => {
-		const [item] = await tx.select().from(workItems).where(eq(workItems.id, workItemId)).limit(1);
+		// Satır kilidi: eşzamanlı geçişler sıraya girer, doğrulama kilitli güncel durumdan yapılır.
+		const [item] = await tx
+			.select()
+			.from(workItems)
+			.where(eq(workItems.id, workItemId))
+			.limit(1)
+			.for('update');
 
 		if (!item) {
 			throw new NotFoundError('İş kaydı bulunamadı');
