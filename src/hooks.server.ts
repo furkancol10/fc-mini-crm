@@ -4,7 +4,7 @@ import { AUTH_COOKIE_NAME, verifySessionCookie } from '$lib/server/auth/cookie';
 import { findUserById } from '$lib/server/auth/users';
 import { getDb } from '$lib/server/db/client';
 
-const PUBLIC_PATHS = ['/giris', '/api/auth/role'];
+const PUBLIC_PATHS = ['/giris', '/api/auth/role', '/api/demo-reset'];
 
 function isPublicPath(pathname: string): boolean {
 	if (PUBLIC_PATHS.includes(pathname)) return true;

@@ -10,8 +10,8 @@
 	</p>
 
 	<div class="mt-4 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-		<strong>KVKK Uyarısı:</strong> Bu uygulama demo amaçlıdır. Lütfen gerçek kişisel veri (T.C. kimlik,
-		gerçek telefon/adres vb.) girmeyiniz.
+		<strong>KVKK Uyarısı:</strong> Gerçek kişisel veri girmeyin. Bu uygulama demo amaçlıdır; gerçek ad,
+		T.C. kimlik, telefon veya e-posta adresi paylaşmayınız.
 	</div>
 
 	{#if form?.error}

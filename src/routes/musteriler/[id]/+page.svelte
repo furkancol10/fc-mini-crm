@@ -1,14 +1,46 @@
 <script lang="ts">
+	import { buildMailtoUrl } from '$lib/domain/links';
+	import { buildWhatsAppUrl } from '$lib/domain/phone';
 	import { getStatusLabel } from '$lib/domain/status';
 
 	let { data, form } = $props();
+
+	const waUrl = $derived(
+		buildWhatsAppUrl(
+			data.customer.phone,
+			`Merhaba ${data.customer.name}, bilgilendirme için yazıyoruz.`
+		)
+	);
+	const mailUrl = $derived(
+		buildMailtoUrl(data.customer.email, `${data.customer.name} — Bilgilendirme`)
+	);
 </script>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center justify-between gap-3">
 		<div>
 			<a href="/musteriler" class="text-xs text-slate-500 hover:underline">← Müşterilere Dön</a>
 			<h1 class="mt-1 text-2xl font-semibold text-slate-900">{data.customer.name}</h1>
+		</div>
+		<div class="flex flex-wrap items-center gap-2 text-xs">
+			{#if waUrl}
+				<a
+					href={waUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="rounded bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-700"
+				>
+					WhatsApp Mesaj
+				</a>
+			{/if}
+			{#if mailUrl}
+				<a
+					href={mailUrl}
+					class="rounded border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+				>
+					E-posta Gönder
+				</a>
+			{/if}
 		</div>
 	</div>
 
