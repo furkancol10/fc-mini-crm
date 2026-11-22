@@ -1,0 +1,4 @@
+# Mimari
+Durum: taslak
+## Kararlar
+
