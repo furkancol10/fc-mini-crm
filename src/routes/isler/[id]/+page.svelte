@@ -85,6 +85,18 @@
 		transfer: 'Havale / EFT'
 	};
 
+	const metadataLabels: Record<string, string> = {
+		device: 'Cihaz',
+		brand: 'Marka',
+		model: 'Model',
+		serialNo: 'Seri No',
+		accessories: 'Aksesuarlar',
+		diagnosis: 'Ön Teşhis',
+		channel: 'Kanal',
+		deliverableUrl: 'Teslim Bağlantısı',
+		brief: 'Kapsam / Özet'
+	};
+
 	const allowedNext = $derived(getAllowedNextStatuses(data.item.status));
 	const metadataEntries = $derived(
 		Object.entries(data.item.metadata ?? {}).filter(([, v]) => v !== undefined && v !== '')
@@ -119,11 +131,15 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{data.item.code} — {data.item.title} | Mini CRM</title>
+</svelte:head>
+
 <div class="space-y-6">
-	<div class="flex flex-wrap items-start justify-between gap-4">
-		<div>
-			<a href="/isler" class="text-xs text-slate-500 hover:underline">← İşlere Dön</a>
-			<h1 class="mt-1 text-2xl font-semibold text-slate-900">
+	<div class="flex flex-wrap items-start justify-between gap-3">
+		<div class="min-w-0">
+			<a href="/isler" class="text-xs text-slate-600 hover:underline">← İşlere Dön</a>
+			<h1 class="mt-1 text-xl font-semibold break-words text-slate-900 sm:text-2xl">
 				{data.item.code} — {data.item.title}
 			</h1>
 			<p class="mt-1 text-sm text-slate-600">
@@ -131,22 +147,28 @@
 				<a href="/musteriler/{data.customer.id}" class="font-medium text-slate-900 hover:underline">
 					{data.customer.name}
 				</a>
-				· Sektör: {data.item.workType === 'service' ? 'Teknik Servis' : 'Ajans'}
+				· Sektör: {data.item.workType === 'service' ? 'Teknik Servis' : 'Ajans / Hizmet'}
 				· Atanan: {data.assignee?.name ?? 'Atanmadı'}
 			</p>
 		</div>
-		<span class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white">
+		<span class="shrink-0 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white">
 			{getStatusLabel(data.item.status, data.item.workType)}
 		</span>
 	</div>
 
 	{#if form?.error}
-		<div class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+		<div
+			role="alert"
+			class="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+		>
 			{form.error}
 		</div>
 	{/if}
 	{#if form?.success}
-		<div class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+		<div
+			role="status"
+			class="rounded border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800"
+		>
 			{form.success}
 		</div>
 	{/if}
@@ -154,7 +176,7 @@
 	<!-- Müşteri Takip Bağlantısı ve Hızlı İletişim (wa.me / mailto) -->
 	<section class="rounded-lg border border-slate-200 bg-white p-4">
 		<div class="flex flex-wrap items-center justify-between gap-3">
-			<div class="min-w-0">
+			<div class="min-w-0 flex-1">
 				<div class="text-xs font-semibold text-slate-600 uppercase">Müşteri Takip Bağlantısı</div>
 				<a
 					href={trackingPath}
@@ -187,7 +209,7 @@
 						href={waShareUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="rounded bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-700"
+						class="rounded bg-emerald-700 px-3 py-1.5 font-medium text-white hover:bg-emerald-800"
 					>
 						WhatsApp Mesaj
 					</a>
@@ -206,19 +228,32 @@
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Detay & Durum Geçişi -->
-		<section class="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
+		<section class="space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
 			<h2 class="text-base font-semibold text-slate-800">İş Bilgileri ve Durum Geçişi</h2>
 
 			{#if data.item.description}
-				<p class="text-sm text-slate-700">{data.item.description}</p>
+				<p class="text-sm break-words text-slate-700">{data.item.description}</p>
 			{/if}
 
 			{#if metadataEntries.length > 0}
-				<dl class="grid grid-cols-2 gap-2 rounded bg-slate-50 p-3 text-xs">
+				<dl class="grid grid-cols-1 gap-2 rounded bg-slate-50 p-3 text-xs sm:grid-cols-2">
 					{#each metadataEntries as [key, value] (key)}
-						<div>
-							<dt class="font-medium text-slate-500">{key}</dt>
-							<dd class="text-slate-900">{String(value)}</dd>
+						<div class="min-w-0">
+							<dt class="font-medium text-slate-600">{metadataLabels[key] ?? key}</dt>
+							<dd class="break-words text-slate-900">
+								{#if key === 'deliverableUrl' && typeof value === 'string' && (value.startsWith('https://') || value.startsWith('http://'))}
+									<a
+										href={value}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="break-all underline hover:text-slate-700"
+									>
+										{value}
+									</a>
+								{:else}
+									{String(value)}
+								{/if}
+							</dd>
 						</div>
 					{/each}
 				</dl>
@@ -246,7 +281,7 @@
 							placeholder="Örn. Parça siparişi verildi"
 						/>
 					</label>
-					<label class="flex items-center gap-2 text-xs text-slate-600">
+					<label class="flex items-center gap-2 text-xs text-slate-700">
 						<input type="checkbox" name="isPublic" checked />
 						Müşteri takip ekranında görünsün
 					</label>
@@ -258,63 +293,86 @@
 					</button>
 				</form>
 			{:else}
-				<p class="text-xs text-slate-500">Bu iş son durumda olduğu için yeni geçiş yapılamaz.</p>
+				<p class="text-xs text-slate-600">Bu iş son durumda olduğu için yeni geçiş yapılamaz.</p>
 			{/if}
 		</section>
 
 		<!-- Zaman Çizelgesi -->
-		<section class="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
+		<section class="space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
 			<h2 class="text-base font-semibold text-slate-800">Zaman Çizelgesi</h2>
 
 			<form method="POST" action="?/addLog" class="space-y-2">
-				<textarea
-					name="message"
-					rows="2"
-					required
-					class="w-full rounded border border-slate-300 px-3 py-1.5 text-sm"
-					placeholder="İşlem notu ekleyin..."></textarea>
-				<div class="flex items-center justify-between">
-					<label class="flex items-center gap-2 text-xs text-slate-600">
+				<label class="block text-xs font-medium text-slate-700">
+					<span>İşlem Notu</span>
+					<textarea
+						name="message"
+						rows="2"
+						required
+						class="mt-1 w-full rounded border border-slate-300 px-3 py-1.5 text-sm font-normal"
+						placeholder="İşlem notu ekleyin..."></textarea>
+				</label>
+				<div class="flex flex-wrap items-center justify-between gap-2">
+					<label class="flex items-center gap-2 text-xs text-slate-700">
 						<input type="checkbox" name="isPublic" />
-						Müşteriye görünür
+						Müşteriye açık
 					</label>
 					<button
 						type="submit"
-						class="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+						class="rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
 					>
 						Not Ekle
 					</button>
 				</div>
 			</form>
 
-			<ul class="max-h-72 space-y-2 overflow-y-auto border-t border-slate-100 pt-3 text-sm">
-				{#each data.logs as log (log.id)}
-					<li class="rounded bg-slate-50 p-2.5">
-						<div class="flex items-center justify-between text-xs text-slate-500">
-							<span>{log.actorName ?? 'Sistem'} · {log.isPublic ? 'Açık' : 'İç Not'}</span>
-							<span>{new Date(log.createdAt).toLocaleString('tr-TR')}</span>
-						</div>
-						<p class="mt-1 text-slate-800">{log.message}</p>
-					</li>
-				{/each}
-			</ul>
+			{#if data.logs.length === 0}
+				<p class="border-t border-slate-100 pt-3 text-sm text-slate-600">
+					Henüz işlem kaydı bulunmuyor.
+				</p>
+			{:else}
+				<ul class="max-h-72 space-y-2 overflow-y-auto border-t border-slate-100 pt-3 text-sm">
+					{#each data.logs as log (log.id)}
+						<li class="rounded bg-slate-50 p-2.5">
+							<div class="flex flex-wrap items-center justify-between gap-1 text-xs text-slate-600">
+								<span>
+									{log.actorName ?? 'Müşteri / Sistem'} · {log.isPublic
+										? 'Müşteriye açık'
+										: 'İç not'}
+								</span>
+								<span>{new Date(log.createdAt).toLocaleString('tr-TR')}</span>
+							</div>
+							<p class="mt-1 break-words text-slate-800">{log.message}</p>
+						</li>
+					{/each}
+				</ul>
+			{/if}
 		</section>
 	</div>
 
 	{#if data.user?.role === 'admin'}
 		<!-- Teklifler -->
-		<section class="space-y-5 rounded-lg border border-slate-200 bg-white p-5">
+		<section class="space-y-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
 			<h2 class="text-base font-semibold text-slate-800">Teklifler</h2>
 
+			{#if data.quotes.length === 0}
+				<p class="text-sm text-slate-600">Bu iş için henüz teklif oluşturulmadı.</p>
+			{/if}
+
 			{#each data.quotes as q (q.id)}
-				<div class="rounded-md border border-slate-200 p-4">
+				<div class="rounded-md border border-slate-200 p-3 sm:p-4">
 					<div class="flex flex-wrap items-center justify-between gap-2">
-						<div>
+						<div class="flex flex-wrap items-center gap-2">
 							<span class="font-semibold text-slate-900">{q.quoteNo}</span>
-							<span class="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium">
+							<span
+								class="rounded px-2 py-0.5 text-xs font-medium {q.status === 'approved'
+									? 'bg-emerald-100 text-emerald-800'
+									: q.status === 'rejected'
+										? 'bg-red-100 text-red-700'
+										: 'bg-slate-100 text-slate-800'}"
+							>
 								{quoteStatusLabels[q.status] ?? q.status}
 							</span>
-							<span class="ml-2 text-xs text-slate-500">
+							<span class="text-xs text-slate-600">
 								{q.vatIncluded ? 'KDV Dahil' : 'KDV Hariç'}
 							</span>
 						</div>
@@ -337,7 +395,7 @@
 									<input type="hidden" name="quoteId" value={q.id} />
 									<button
 										type="submit"
-										class="rounded bg-blue-600 px-2.5 py-1 text-white hover:bg-blue-700"
+										class="rounded bg-blue-700 px-2.5 py-1 font-medium text-white hover:bg-blue-800"
 									>
 										Gönder
 									</button>
@@ -348,7 +406,7 @@
 									<input type="hidden" name="quoteId" value={q.id} />
 									<button
 										type="submit"
-										class="rounded bg-emerald-600 px-2.5 py-1 text-white hover:bg-emerald-700"
+										class="rounded bg-emerald-700 px-2.5 py-1 font-medium text-white hover:bg-emerald-800"
 									>
 										Onayla
 									</button>
@@ -357,7 +415,7 @@
 									<input type="hidden" name="quoteId" value={q.id} />
 									<button
 										type="submit"
-										class="rounded border border-red-300 px-2.5 py-1 text-red-700 hover:bg-red-50"
+										class="rounded border border-red-300 px-2.5 py-1 font-medium text-red-700 hover:bg-red-50"
 									>
 										Reddet
 									</button>
@@ -384,25 +442,26 @@
 							class="mt-4 space-y-3 rounded bg-slate-50 p-3"
 						>
 							<input type="hidden" name="quoteId" value={q.id} />
-							<div class="flex items-center gap-4 text-xs">
+							<div class="flex flex-wrap items-center gap-4 text-xs">
 								<label class="flex items-center gap-1.5">
-									<span>KDV Modu:</span>
+									<span class="text-slate-700">KDV Modu:</span>
 									<select
 										name="vatIncluded"
 										value={editVatIncluded ? 'true' : 'false'}
-										class="rounded border border-slate-300 px-2 py-1"
+										class="rounded border border-slate-300 bg-white px-2 py-1"
 									>
 										<option value="false">KDV Hariç</option>
 										<option value="true">KDV Dahil</option>
 									</select>
 								</label>
 							</div>
-							{#each editQuoteLines as line (line.id)}
+							{#each editQuoteLines as line, idx (line.id)}
 								<div class="grid gap-2 sm:grid-cols-12">
 									<select
 										name="item_kind"
+										aria-label="Kalem {idx + 1} türü"
 										bind:value={line.kind}
-										class="rounded border border-slate-300 px-2 py-1 text-xs sm:col-span-2"
+										class="min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs sm:col-span-2"
 									>
 										<option value="service">Hizmet</option>
 										<option value="part">Parça</option>
@@ -410,29 +469,33 @@
 									</select>
 									<input
 										name="item_description"
+										aria-label="Kalem {idx + 1} açıklaması"
 										bind:value={line.description}
 										required
 										placeholder="Açıklama"
-										class="rounded border border-slate-300 px-2 py-1 text-xs sm:col-span-4"
+										class="min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs sm:col-span-4"
 									/>
 									<input
 										name="item_qty"
+										aria-label="Kalem {idx + 1} miktarı"
 										bind:value={line.qty}
 										required
 										placeholder="Miktar"
-										class="rounded border border-slate-300 px-2 py-1 text-xs sm:col-span-1"
+										class="min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs sm:col-span-1"
 									/>
 									<input
 										name="item_unitPriceTl"
+										aria-label="Kalem {idx + 1} birim fiyatı (TL)"
 										bind:value={line.unitPriceTl}
 										required
 										placeholder="Birim TL"
-										class="rounded border border-slate-300 px-2 py-1 text-xs sm:col-span-2"
+										class="min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs sm:col-span-2"
 									/>
 									<select
 										name="item_vatRate"
+										aria-label="Kalem {idx + 1} KDV oranı"
 										bind:value={line.vatRate}
-										class="rounded border border-slate-300 px-2 py-1 text-xs sm:col-span-2"
+										class="min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs sm:col-span-2"
 									>
 										{#each COMMON_VAT_RATES as rate (rate)}
 											<option value={rate}>%{rate} KDV</option>
@@ -441,7 +504,9 @@
 									<button
 										type="button"
 										onclick={() => removeEditLine(line.id)}
-										class="text-xs text-red-600 sm:col-span-1"
+										disabled={editQuoteLines.length <= 1}
+										aria-label="Kalem {idx + 1} sil"
+										class="text-xs font-medium text-red-700 disabled:opacity-40 sm:col-span-1"
 									>
 										Sil
 									</button>
@@ -449,61 +514,70 @@
 							{/each}
 							<input
 								name="notes"
+								aria-label="Teklif notu"
 								bind:value={editNotes}
 								placeholder="Teklif notu"
-								class="w-full rounded border border-slate-300 px-2 py-1 text-xs"
+								class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs"
 							/>
-							<div class="flex items-center gap-2">
+							<div class="flex flex-wrap items-center gap-2">
 								<button
 									type="button"
 									onclick={addEditLine}
-									class="rounded border border-slate-300 px-2.5 py-1 text-xs"
+									class="rounded border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-100"
 								>
 									+ Kalem Ekle
 								</button>
 								<button
 									type="submit"
-									class="rounded bg-slate-900 px-3 py-1 text-xs font-medium text-white"
+									class="rounded bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-slate-800"
 								>
 									Taslağı Kaydet
 								</button>
 								<button
 									type="button"
 									onclick={() => (editingQuoteId = null)}
-									class="text-xs text-slate-500"
+									class="text-xs text-slate-600 hover:underline"
 								>
 									Vazgeç
 								</button>
 							</div>
 						</form>
 					{:else}
-						<table class="mt-3 w-full text-left text-xs">
-							<thead class="border-b border-slate-200 text-slate-500">
-								<tr>
-									<th class="py-1">Tür</th>
-									<th class="py-1">Açıklama</th>
-									<th class="py-1 text-right">Miktar</th>
-									<th class="py-1 text-right">Birim</th>
-									<th class="py-1 text-right">KDV</th>
-									<th class="py-1 text-right">Tutar</th>
-								</tr>
-							</thead>
-							<tbody class="divide-y divide-slate-100">
-								{#each q.items as line (line.id)}
+						<div class="mt-3 overflow-x-auto">
+							<table class="w-full text-left text-xs">
+								<thead class="border-b border-slate-200 text-slate-600">
 									<tr>
-										<td class="py-1.5">{kindLabels[line.kind] ?? line.kind}</td>
-										<td class="py-1.5">{line.description}</td>
-										<td class="py-1.5 text-right">{Number(line.qty)}</td>
-										<td class="py-1.5 text-right">{formatKurus(line.unitPriceKurus)}</td>
-										<td class="py-1.5 text-right">%{line.vatRate}</td>
-										<td class="py-1.5 text-right font-medium">
-											{formatKurus(line.lineTotalKurus)}
-										</td>
+										<th class="py-1 pr-2">Tür</th>
+										<th class="py-1 pr-2">Açıklama</th>
+										<th class="py-1 pr-2 text-right">Miktar</th>
+										<th class="py-1 pr-2 text-right">Birim</th>
+										<th class="py-1 pr-2 text-right">KDV</th>
+										<th class="py-1 text-right">Tutar</th>
 									</tr>
-								{/each}
-							</tbody>
-						</table>
-						<div class="mt-3 flex justify-end gap-6 border-t border-slate-100 pt-2 text-xs">
+								</thead>
+								<tbody class="divide-y divide-slate-100">
+									{#each q.items as line (line.id)}
+										<tr>
+											<td class="py-1.5 pr-2 whitespace-nowrap">
+												{kindLabels[line.kind] ?? line.kind}
+											</td>
+											<td class="py-1.5 pr-2">{line.description}</td>
+											<td class="py-1.5 pr-2 text-right tabular-nums">{Number(line.qty)}</td>
+											<td class="py-1.5 pr-2 text-right whitespace-nowrap tabular-nums">
+												{formatKurus(line.unitPriceKurus)}
+											</td>
+											<td class="py-1.5 pr-2 text-right tabular-nums">%{line.vatRate}</td>
+											<td class="py-1.5 text-right font-medium whitespace-nowrap tabular-nums">
+												{formatKurus(line.lineTotalKurus)}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+						<div
+							class="mt-3 flex flex-wrap justify-end gap-x-5 gap-y-1 border-t border-slate-100 pt-2 text-xs tabular-nums"
+						>
 							<span>Ara Toplam: <strong>{formatKurus(q.subtotalKurus)}</strong></span>
 							<span>KDV: <strong>{formatKurus(q.vatTotalKurus)}</strong></span>
 							<span>Genel Toplam: <strong>{formatKurus(q.totalKurus)}</strong></span>
@@ -516,7 +590,7 @@
 			<form
 				method="POST"
 				action="?/createQuote"
-				class="space-y-3 rounded-md border border-dashed border-slate-300 p-4"
+				class="space-y-3 rounded-md border border-dashed border-slate-300 p-3 sm:p-4"
 			>
 				<h3 class="text-sm font-semibold text-slate-800">Yeni Teklif Oluştur</h3>
 				<div class="flex flex-wrap gap-4 text-xs">
@@ -537,12 +611,13 @@
 					</label>
 				</div>
 
-				{#each newQuoteLines as line (line.id)}
+				{#each newQuoteLines as line, idx (line.id)}
 					<div class="grid gap-2 sm:grid-cols-12">
 						<select
 							name="item_kind"
+							aria-label="Yeni kalem {idx + 1} türü"
 							bind:value={line.kind}
-							class="rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-2"
+							class="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-2"
 						>
 							<option value="service">Hizmet</option>
 							<option value="part">Parça</option>
@@ -550,29 +625,33 @@
 						</select>
 						<input
 							name="item_description"
+							aria-label="Yeni kalem {idx + 1} açıklaması"
 							bind:value={line.description}
 							required
 							placeholder="Kalem açıklaması"
-							class="rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-4"
+							class="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-4"
 						/>
 						<input
 							name="item_qty"
+							aria-label="Yeni kalem {idx + 1} miktarı"
 							bind:value={line.qty}
 							required
 							placeholder="Miktar"
-							class="rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-1"
+							class="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-1"
 						/>
 						<input
 							name="item_unitPriceTl"
+							aria-label="Yeni kalem {idx + 1} birim fiyatı (TL)"
 							bind:value={line.unitPriceTl}
 							required
 							placeholder="Birim TL (örn. 1500,00)"
-							class="rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-2"
+							class="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-2"
 						/>
 						<select
 							name="item_vatRate"
+							aria-label="Yeni kalem {idx + 1} KDV oranı"
 							bind:value={line.vatRate}
-							class="rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-2"
+							class="min-w-0 rounded border border-slate-300 px-2 py-1.5 text-xs sm:col-span-2"
 						>
 							{#each COMMON_VAT_RATES as rate (rate)}
 								<option value={rate}>%{rate} KDV</option>
@@ -581,7 +660,9 @@
 						<button
 							type="button"
 							onclick={() => removeNewQuoteLine(line.id)}
-							class="text-xs text-red-600 sm:col-span-1"
+							disabled={newQuoteLines.length <= 1}
+							aria-label="Yeni kalem {idx + 1} sil"
+							class="text-xs font-medium text-red-700 disabled:opacity-40 sm:col-span-1"
 						>
 							Sil
 						</button>
@@ -590,11 +671,12 @@
 
 				<input
 					name="notes"
+					aria-label="Yeni teklif notu"
 					placeholder="Teklif notu (isteğe bağlı)"
 					class="w-full rounded border border-slate-300 px-3 py-1.5 text-xs"
 				/>
 
-				<div class="flex items-center gap-2">
+				<div class="flex flex-wrap items-center gap-2">
 					<button
 						type="button"
 						onclick={addNewQuoteLine}
@@ -614,7 +696,7 @@
 
 		<!-- Tahsilat ve Türetilmiş Bakiye -->
 		{#if data.balance}
-			<section class="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
+			<section class="space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
 				<div class="flex flex-wrap items-center justify-between gap-2">
 					<h2 class="text-base font-semibold text-slate-800">Tahsilat ve Bakiye</h2>
 					<span class="rounded bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
@@ -624,20 +706,20 @@
 
 				<div class="grid gap-3 sm:grid-cols-3">
 					<div class="rounded bg-slate-50 p-3">
-						<div class="text-xs text-slate-500">Onaylı Teklif</div>
-						<div class="mt-1 text-lg font-semibold text-slate-900">
+						<div class="text-xs text-slate-600">Onaylı Teklif</div>
+						<div class="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
 							{formatKurus(data.balance.approvedTotalKurus)}
 						</div>
 					</div>
 					<div class="rounded bg-slate-50 p-3">
-						<div class="text-xs text-slate-500">Toplam Tahsilat</div>
-						<div class="mt-1 text-lg font-semibold text-emerald-700">
+						<div class="text-xs text-slate-600">Toplam Tahsilat</div>
+						<div class="mt-1 text-lg font-semibold text-emerald-700 tabular-nums">
 							{formatKurus(data.balance.paidTotalKurus)}
 						</div>
 					</div>
 					<div class="rounded bg-slate-50 p-3">
-						<div class="text-xs text-slate-500">Kalan Bakiye</div>
-						<div class="mt-1 text-lg font-semibold text-slate-900">
+						<div class="text-xs text-slate-600">Kalan Bakiye</div>
+						<div class="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
 							{formatKurus(data.balance.remainingKurus)}
 						</div>
 					</div>
@@ -686,34 +768,48 @@
 					</div>
 				</form>
 
-				{#if data.payments.length > 0}
-					<table class="w-full text-left text-xs">
-						<thead class="border-b border-slate-200 text-slate-500">
-							<tr>
-								<th class="py-1.5">Tarih</th>
-								<th class="py-1.5">Yöntem</th>
-								<th class="py-1.5">Belge No</th>
-								<th class="py-1.5 text-right">Tutar</th>
-								<th class="py-1.5 text-right">İşlem</th>
-							</tr>
-						</thead>
-						<tbody class="divide-y divide-slate-100">
-							{#each data.payments as p (p.id)}
+				{#if data.payments.length === 0}
+					<p class="border-t border-slate-100 pt-3 text-sm text-slate-600">
+						Henüz tahsilat kaydı bulunmuyor.
+					</p>
+				{:else}
+					<div class="overflow-x-auto">
+						<table class="w-full text-left text-xs">
+							<thead class="border-b border-slate-200 text-slate-600">
 								<tr>
-									<td class="py-2">{new Date(p.paidAt).toLocaleString('tr-TR')}</td>
-									<td class="py-2">{methodLabels[p.method] ?? p.method}</td>
-									<td class="py-2">{p.invoiceRef ?? '—'}</td>
-									<td class="py-2 text-right font-medium">{formatKurus(p.amountKurus)}</td>
-									<td class="py-2 text-right">
-										<form method="POST" action="?/deletePayment" class="inline">
-											<input type="hidden" name="paymentId" value={p.id} />
-											<button type="submit" class="text-red-600 hover:underline">Sil</button>
-										</form>
-									</td>
+									<th class="py-1.5 pr-2">Tarih</th>
+									<th class="py-1.5 pr-2">Yöntem</th>
+									<th class="py-1.5 pr-2">Belge No</th>
+									<th class="py-1.5 pr-2 text-right">Tutar</th>
+									<th class="py-1.5 text-right">İşlem</th>
 								</tr>
-							{/each}
-						</tbody>
-					</table>
+							</thead>
+							<tbody class="divide-y divide-slate-100">
+								{#each data.payments as p (p.id)}
+									<tr>
+										<td class="py-2 pr-2 whitespace-nowrap">
+											{new Date(p.paidAt).toLocaleString('tr-TR')}
+										</td>
+										<td class="py-2 pr-2 whitespace-nowrap">
+											{methodLabels[p.method] ?? p.method}
+										</td>
+										<td class="py-2 pr-2">{p.invoiceRef ?? '—'}</td>
+										<td class="py-2 pr-2 text-right font-medium whitespace-nowrap tabular-nums">
+											{formatKurus(p.amountKurus)}
+										</td>
+										<td class="py-2 text-right">
+											<form method="POST" action="?/deletePayment" class="inline">
+												<input type="hidden" name="paymentId" value={p.id} />
+												<button type="submit" class="font-medium text-red-700 hover:underline">
+													Sil
+												</button>
+											</form>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
 				{/if}
 			</section>
 		{/if}

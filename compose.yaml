@@ -3,7 +3,7 @@ services:
     image: postgres:17
     restart: unless-stopped
     ports:
-      - '${POSTGRES_PORT:-5436}:5432'
+      - '${POSTGRES_PORT:-5438}:5432'
     environment:
       POSTGRES_USER: minicrm
       POSTGRES_PASSWORD: minicrm

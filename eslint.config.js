@@ -38,6 +38,14 @@ export default ts.config(
 		}
 	},
 	{
-		ignores: ['build/', '.svelte-kit/', '.vercel/', 'dist/', 'drizzle/']
+		ignores: [
+			'build/',
+			'.svelte-kit/',
+			'.vercel/',
+			'dist/',
+			'drizzle/',
+			'test-results/',
+			'playwright-report/'
+		]
 	}
 );

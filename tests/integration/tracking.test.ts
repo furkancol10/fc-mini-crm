@@ -224,6 +224,60 @@ describe('müşteri takip sayfası /takip/[token] (gerçek Postgres)', () => {
 		expect(logs.some((l) => l.isPublic && l.message.includes('reddetti'))).toBe(true);
 	});
 
+	it('teslim edilmiş (delivered) veya iptal edilmiş (cancelled) işte müşteri teklif reddi engellenir', async () => {
+		const customer = await createCustomer(db, admin, { name: 'Kaan Demir', kind: 'active' });
+
+		// 1. İptal edilmiş iş + gönderilmiş teklif
+		const cancelledItem = await createWorkItem(db, admin, {
+			customerId: customer.id,
+			workType: 'service',
+			title: 'İptal edilen servis işi'
+		});
+		const qCancelled = await createQuote(db, admin, {
+			workItemId: cancelledItem.id,
+			items: [
+				{ kind: 'service', description: 'Bakım', qty: 1, unitPriceKurus: 1000_00, vatRate: 20 }
+			]
+		});
+		await sendQuote(db, admin, qCancelled.id);
+		await db
+			.update(workItems)
+			.set({ status: 'cancelled' })
+			.where(eq(workItems.id, cancelledItem.id));
+
+		await expect(
+			rejectQuoteByToken(db, cancelledItem.publicToken, qCancelled.id)
+		).rejects.toBeInstanceOf(ValidationError);
+
+		const [stillSentCancelled] = await db.select().from(quotes).where(eq(quotes.id, qCancelled.id));
+		expect(stillSentCancelled.status).toBe('sent');
+
+		// 2. Teslim edilmiş iş + gönderilmiş teklif
+		const deliveredItem = await createWorkItem(db, admin, {
+			customerId: customer.id,
+			workType: 'service',
+			title: 'Teslim edilen servis işi'
+		});
+		const qDelivered = await createQuote(db, admin, {
+			workItemId: deliveredItem.id,
+			items: [
+				{ kind: 'service', description: 'Bakım', qty: 1, unitPriceKurus: 1500_00, vatRate: 20 }
+			]
+		});
+		await sendQuote(db, admin, qDelivered.id);
+		await db
+			.update(workItems)
+			.set({ status: 'delivered', deliveredAt: new Date() })
+			.where(eq(workItems.id, deliveredItem.id));
+
+		await expect(
+			rejectQuoteByToken(db, deliveredItem.publicToken, qDelivered.id)
+		).rejects.toBeInstanceOf(ValidationError);
+
+		const [stillSentDelivered] = await db.select().from(quotes).where(eq(quotes.id, qDelivered.id));
+		expect(stillSentDelivered.status).toBe('sent');
+	});
+
 	it('/takip/[token] rota katmanı yanlış tokenda 404, aşırı onay/red isteğinde 429 verir', async () => {
 		await expect(
 			takipLoad({

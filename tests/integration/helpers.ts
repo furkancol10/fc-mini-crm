@@ -5,7 +5,7 @@ import { createDb, type Database } from '$lib/server/db/client';
 import { users } from '$lib/server/db/schema';
 
 export const TEST_DB_URL =
-	process.env.TEST_DATABASE_URL ?? 'postgres://minicrm:minicrm@localhost:5436/minicrm_test';
+	process.env.TEST_DATABASE_URL ?? 'postgres://minicrm:minicrm@localhost:5438/minicrm_test';
 
 let migrated = false;
 

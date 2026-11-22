@@ -1,4 +1,4 @@
-const DEFAULT_DEV_DB_URL = 'postgres://minicrm:minicrm@localhost:5436/minicrm';
+const DEFAULT_DEV_DB_URL = 'postgres://minicrm:minicrm@localhost:5438/minicrm';
 const DEFAULT_DEV_COOKIE_SECRET = 'dev-only-change-me-at-least-32-bytes-long';
 const DEFAULT_DEV_DEMO_RESET_SECRET = 'dev-only-demo-reset-secret-change-me';
 

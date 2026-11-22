@@ -82,6 +82,10 @@ export interface WorkItemFilters {
 	overdue?: boolean;
 }
 
+function escapeLikePattern(value: string): string {
+	return value.replace(/[\\%_]/g, '\\$&');
+}
+
 export async function listWorkItems(
 	db: Database,
 	user: AuthUser | null,
@@ -119,7 +123,7 @@ export async function listWorkItems(
 		);
 	}
 	if (filters?.q && filters.q.trim().length > 0) {
-		const pattern = `%${filters.q.trim()}%`;
+		const pattern = `%${escapeLikePattern(filters.q.trim())}%`;
 		const searchCondition = or(
 			ilike(workItems.code, pattern),
 			ilike(workItems.title, pattern),

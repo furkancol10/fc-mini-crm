@@ -11,6 +11,6 @@
 		"strict": true,
 		"moduleResolution": "bundler"
 	},
-	"include": ["src", "tests", "scripts", "*.ts", "*.js"],
+	"include": ["src", "tests", "scripts", "e2e", "*.ts", "*.js"],
 	"exclude": ["src/service-worker", "node_modules", ".svelte-kit", "build", "dist"]
 }

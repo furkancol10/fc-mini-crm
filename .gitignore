@@ -7,3 +7,5 @@ dist/
 __pycache__/
 .venv/
 .vercel/
+test-results/
+playwright-report/

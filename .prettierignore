@@ -6,3 +6,5 @@ drizzle/
 docs/
 reports/
 CLAUDE.md
+test-results/
+playwright-report/

@@ -1,6 +1,6 @@
 import { defineConfig } from 'drizzle-kit';
 
-const url = process.env.DATABASE_URL ?? 'postgres://minicrm:minicrm@localhost:5436/minicrm';
+const url = process.env.DATABASE_URL ?? 'postgres://minicrm:minicrm@localhost:5438/minicrm';
 
 export default defineConfig({
 	schema: './src/lib/server/db/schema.ts',

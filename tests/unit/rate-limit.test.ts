@@ -36,3 +36,25 @@ describe('rate-limit (bellek içi pencere sınırlayıcı)', () => {
 		expect(limiter.check('k').allowed).toBe(true);
 	});
 });
+
+describe('hız sınırı env geçersiz kılma', () => {
+	async function loadLimit(env: Record<string, string | undefined>) {
+		const { vi } = await import('vitest');
+		vi.resetModules();
+		vi.unstubAllEnvs();
+		for (const [k, v] of Object.entries(env)) vi.stubEnv(k, v as string);
+		const mod = await import('$lib/server/rate-limit');
+		let allowed = 0;
+		while (mod.panelDemoResetLimiter.check('k').allowed && allowed < 500) allowed++;
+		vi.unstubAllEnvs();
+		return allowed;
+	}
+
+	it('yerelde PANEL_DEMO_RESET_RATE_LIMIT uygulanır', async () => {
+		expect(await loadLimit({ VERCEL: '', PANEL_DEMO_RESET_RATE_LIMIT: '100' })).toBe(100);
+	});
+
+	it('VERCEL ortamında geçersiz kılma yok sayılır (varsayılan 3)', async () => {
+		expect(await loadLimit({ VERCEL: '1', PANEL_DEMO_RESET_RATE_LIMIT: '100' })).toBe(3);
+	});
+});
