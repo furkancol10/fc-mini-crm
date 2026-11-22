@@ -1,5 +1,5 @@
 # Mimari
-Durum: taslak (kullanıcı onayı bekliyor)
+Durum: onaylı (kullanıcı, 2026-11-22)
 Kaynak: reports/05 (Opus) + reports/06 (Neon), GM birleştirmesi. Ayrıntı ve gerekçe için iki rapora bak.
 
 ## Kararlar
@@ -36,9 +36,5 @@ users, sessions yok (cookie) · customers(lead|active) · work_items(code, publi
 ## Riskler
 3 günde kapsam taşması; serverless bağlantı tükenmesi (düşük max, pooler); jsonb'de filtre zayıf (filtreler sabit kolonlarda); açık demoda spam/CSV injection; KDV/e-Fatura mevzuatı doğrulanmadı ("temsili" notu); Neon Free limitleri.
 
-## Açık sorular (kullanıcı kararı)
-1. Durum sayısı: 8 (ready dahil, önerilen) mi, 7 mi?
-2. Müşteri takip sayfasında teklif Onayla/Reddet MVP'de kalsın mı (öneri: evet, en çok satan özellik), yoksa salt okunur mu?
-3. Sektörler tek demo panelinde (önerilen) mi, ayrı demo adreslerinde mi?
-4. Teknisyen yalnız atanan işleri mi görsün (öneri) yoksa hepsini mi?
-5. KDV varsayılanı hariç mi dahil mi (öneri: hariç)?
+## Verilen kararlar (2026-11-22, hepsi öneri yönünde)
+1. 8 durum (ready dahil). 2. Takip sayfasında teklif Onayla/Reddet MVP'de. 3. İki sektör tek demo panelinde. 4. Teknisyen yalnız atanan işleri görür. 5. KDV varsayılanı hariç.

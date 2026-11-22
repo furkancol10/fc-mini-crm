@@ -2,7 +2,7 @@
 ## Amaç
 Teknik servis ve küçük ajanslar için mini CRM / teklif-iş takip paneli (Bionluk portföy projesi 6; canlı demo, TR arayüz).
 ## Stack
-TBD (mimari kararından sonra yazılır; yol haritası önerisi: SvelteKit + PostgreSQL)
+SvelteKit + Drizzle + postgres.js + adapter-vercel + PostgreSQL; Vitest + Playwright. Mimari: docs/ARCHITECTURE.md (onaylı)
 ## Komutlar
 - test: TBD
 - build: TBD
