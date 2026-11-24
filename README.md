@@ -1,5 +1,7 @@
 # Mini CRM — Teklif ve İş Takip Paneli
 
+![tests](https://github.com/furkancol10/fc-mini-crm/actions/workflows/test.yml/badge.svg)
+
 Teknik servisler ve küçük ajanslar için geliştirilmiş; müşteri kaydı, iş/servis takibi, kalemli KDV tekliflendirme, müşteri takip bağlantısı üzerinden onay/red ve tahsilat-bakiye yönetimi sunan Türkçe mini CRM uygulaması.
 
 ## Ne İşe Yarar?
