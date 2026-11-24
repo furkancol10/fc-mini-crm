@@ -12,7 +12,9 @@ export function createDb(connectionString: string, options?: { max?: number }) {
 	const sql = postgres(connectionString, {
 		max: options?.max ?? 5,
 		idle_timeout: 20,
-		connect_timeout: 10
+		connect_timeout: 10,
+		// Supabase/PgBouncer transaction pooler does not support prepared statements.
+		prepare: false
 	});
 	const db = drizzle(sql, { schema });
 	return { db, sql };
