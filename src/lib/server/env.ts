@@ -34,3 +34,11 @@ export function getDemoResetSecret(): string | null {
 	}
 	return DEFAULT_DEV_DEMO_RESET_SECRET;
 }
+
+export function getCronSecret(): string | null {
+	const secret = process.env.CRON_SECRET;
+	if (secret && secret.trim().length >= 16) {
+		return secret.trim();
+	}
+	return null;
+}
