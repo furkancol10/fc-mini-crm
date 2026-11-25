@@ -36,6 +36,7 @@ Küçük işletmelerde teklifler e-posta ve WhatsApp mesajlarına, cihaz/proje d
 
 - **Uygulama:** SvelteKit (Svelte 5) + TypeScript + Tailwind CSS v4 + `@sveltejs/adapter-vercel`
 - **Veritabanı:** PostgreSQL 17 + Drizzle ORM + `postgres.js` + Zod
+- **Dağıtım:** Vercel (fra1) + Supabase (PostgreSQL); demo verisi `vercel.json` içindeki cron ile her gün 03:00 (UTC) sıfırlanır
 - **Test ve Kalite:** Vitest (birim ve gerçek PostgreSQL entegrasyon testleri), Playwright (360px mobil + masaüstü E2E), ESLint, Prettier, `svelte-check`
 
 ## Yerelde Çalıştırma
@@ -117,4 +118,3 @@ Aşağıdaki özellikler bilerek MVP kapsamı dışında bırakılmıştır:
 - Stok ve depo yönetimi
 - Otomatik SMS / WhatsApp Business API gönderimi
 - Dosya / fotoğraf yükleme
-- Otomatik zamanlanmış sıfırlama (cron) ve canlı ortam dağıtım adımları
